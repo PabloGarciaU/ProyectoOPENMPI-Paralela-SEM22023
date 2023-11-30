@@ -1,0 +1,38 @@
+//  METAS PROPUESTAS POR MI PARA CREAR EL PROYECTO-OPENMPI
+
+- Crear el main ✔️
+- Crear la matriz (paralelo)
+- Leer el archivo y llenar la matriz (paralelo)
+- Corregir los errores de la matriz (paralelo)
+- Generar la imagen de cada matriz (paralelo)
+- Unir los datos de las 4 matrices para la imagen final (ni idea como)
+- generar la imagen de la matriz final
+
+// LIMITACIONES
+127.0.0.1 slots=2 max_slots=4
+Osea, dos hilos y 4 procesos para trabajar, suponiendo que esos son los limites
+
+//  PROPUESTAS DE FUNCIONES
+Leerarchivo()
+crearmatriz()
+llenarmatriz()
+corregitmatriz()
+unirmatriz()
+generarimagen()
+
+//  COMO FUNCIONARA
+La idea de esto es crear la matriz, 
+leer los datos de los archivos y llenarla,
+corregir despues estos datos,
+mostrar cada una de las 4 matrices,
+despues unir todo a una sola matriz,
+y despues mostrar la imagen final de esa matriz
+
+//  IDEAL
+En mundo ideal donde soy un programador componente,
+segmentaria todo en archivos aparte para que el codigo sea limpio y ordenado,
+pero considerando que tengo 2 pruebas para la semana de entrega de esto,
+me enfocare en entregar un trabajo funcional, centrandome en cumnplir el 
+objetivo usando todo lo que pueda el paralelismo,
+aunque en ningun lado del informe sugiere cuanto,
+intentare que sea todo lo posible considerando mi poca habilidad
