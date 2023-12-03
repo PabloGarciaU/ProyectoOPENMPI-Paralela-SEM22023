@@ -2,7 +2,7 @@ CXX = mpic++
 CXXFLAGS = -g3 -Wall -fopenmp
 MKDIR = mkdir -p
 
-LIBS = -lm -lmpi -fopenmp
+LIBS = -lm -lmpi -fopenmp -lCIMG
 
 directorios: 
 	$(MKDIR) build dist

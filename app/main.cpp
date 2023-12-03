@@ -4,6 +4,7 @@
 #include <iostream>
 #include <omp.h>
 #include <vector>
+#include "CImg.h"
 
 // Tamaño de la matriz
 const int filas = 10681;
@@ -14,7 +15,7 @@ void crearmatriz(std::vector<std::vector<double>>& matriz) {
     #pragma omp parallel for
     for (int i = 0; i < filas; ++i) {
         for (int j = 0; j < columnas; ++j) {
-            matriz[i][j] = 0;  // Inicializar a 0 como ejemplo
+            matriz[i][j] = 1.0;  // Inicializar a 1.0 como ejemplo
         }
     }
 }
@@ -24,7 +25,7 @@ void llenarmatriz(std::vector<std::vector<double>>& matriz) {
     for (int i = 0; i < filas; ++i) {
         for (int j = 0; j < columnas; ++j) {
             // Llenar la matriz con cero
-            matriz[i][j] = 0;
+            matriz[i][j] = 1.0;
         }
     }
 }
@@ -37,8 +38,28 @@ void unirmatriz(){
 
 }
 
-void generarimagen(){
+// Función para generar una imagen PPM a partir de los datos de una matriz
+void generarimagen(const std::vector<std::vector<double>>& matriz, const char* nombreArchivo) {
+    FILE* archivo = fopen(nombreArchivo, "w");
 
+    if (!archivo) {
+        fprintf(stderr, "Error al abrir el archivo: %s\n", nombreArchivo);
+        return;
+    }
+
+    // Encabezado PPM
+    fprintf(archivo, "P3\n%d %d\n255\n", columnas, filas);
+
+    // Mapeo de valores de la matriz a componentes de color y escritura en el archivo
+    for (int i = 0; i < filas; ++i) {
+        for (int j = 0; j < columnas; ++j) {
+            int valor = static_cast<int>(matriz[i][j] * 255.0);
+            fprintf(archivo, "%d %d %d ", valor, valor, valor);
+        }
+        fprintf(archivo, "\n");
+    }
+
+    fclose(archivo);
 }
 
 // Función para llenar la matriz desde un archivo de texto
@@ -83,6 +104,7 @@ void valorinicial(const std::vector<std::vector<double>>& matriz) {
 }
 
 int main() {
+    // Inicializa las matrices
     std::vector<std::vector<double>> alfa(filas, std::vector<double>(columnas, 0.0));
     std::vector<std::vector<double>> azul(filas, std::vector<double>(columnas, 0.0));
     std::vector<std::vector<double>> rojo(filas, std::vector<double>(columnas, 0.0));
@@ -101,6 +123,7 @@ int main() {
             leerarchivo("alfa.txt", alfa);
             //saludo();
             //valorinicial(alfa);
+            generarimagen(alfa, "alfa.ppm");
         }
         #pragma omp section
         {
@@ -129,5 +152,5 @@ int main() {
     }
 
     return EXIT_SUCCESS;
-    
+
 }
