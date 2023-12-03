@@ -1,22 +1,25 @@
 //  METAS PROPUESTAS POR MI PARA CREAR EL PROYECTO-OPENMPI
 
 - Crear el main ✔️
-- Crear la matriz (paralelo)
-- Leer el archivo y llenar la matriz (paralelo)
+- Crear la matriz (paralelo) ✔️
+- Leer el archivo y llenar la matriz (paralelo) ✔️
 - Corregir los errores de la matriz (paralelo)
 - Generar la imagen de cada matriz (paralelo)
 - Unir los datos de las 4 matrices para la imagen final (ni idea como)
-- generar la imagen de la matriz final
+- Generar la imagen de la matriz final
+- Verificar que el resultado sea coherente y resuelva el problema
+- Segmentar y hacer el codigo mas legible y optimo, PRIMERO QUE FUNCIONE
 
 // LIMITACIONES
 127.0.0.1 slots=2 max_slots=4
 Osea, dos hilos y 4 procesos para trabajar, suponiendo que esos son los limites
+Por ahora los deje en slots=4 max_slots=4
 
 //  PROPUESTAS DE FUNCIONES
-Leerarchivo()
-crearmatriz()
-llenarmatriz()
-corregitmatriz()
+Leerarchivo() ✔️
+llenarmatriz() ✔️
+crearmatriz() ✔️
+corregirmatriz()
 unirmatriz()
 generarimagen()
 
@@ -26,13 +29,14 @@ leer los datos de los archivos y llenarla,
 corregir despues estos datos,
 mostrar cada una de las 4 matrices,
 despues unir todo a una sola matriz,
-y despues mostrar la imagen final de esa matriz
+y despues mostrar la imagen final de esa matriz,
+utilizando 4 hilos de procesador
 
 //  IDEAL
 En mundo ideal donde soy un programador componente,
 segmentaria todo en archivos aparte para que el codigo sea limpio y ordenado,
 pero considerando que tengo 2 pruebas para la semana de entrega de esto,
 me enfocare en entregar un trabajo funcional, centrandome en cumnplir el 
-objetivo usando todo lo que pueda el paralelismo,
+objetivo usando todo lo que pueda el paralelismo, y despues en hacer mas legible el codigo y segmentarlo en archivos,
 aunque en ningun lado del informe sugiere cuanto,
 intentare que sea todo lo posible considerando mi poca habilidad
