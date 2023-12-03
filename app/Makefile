@@ -1,17 +1,14 @@
 CXX = mpic++
-CXXFLAGS = -g3 -Wall
+CXXFLAGS = -g3 -Wall -fopenmp
 MKDIR = mkdir -p
 
-LIBS=-lm -lmpi
+LIBS = -lm -lmpi -fopenmp
 
 directorios: 
 	$(MKDIR) build dist
 
 main.o: directorios main.cpp
 	$(CXX) $(CXXFLAGS) -c main.cpp -o build/main.o
-
-#utilidades.o: directorios utilidades.c utilidades.h
-#	$(CXX) $(CXXFLAGS) -c utilidades.c -o build/utilidades.o
 
 all: clean main.o
 	$(CXX) $(CXXFLAGS) $(LIBS) -o dist/programa build/main.o

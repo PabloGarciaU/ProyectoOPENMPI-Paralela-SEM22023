@@ -1,24 +1,49 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <mpi.h>
+#include <omp.h>
+#include <vector>
 
-int main(int argc, char** argv) {
-    int mi_rango, num_procesos;
+// Tamaño de la matriz
+const int filas = 10681;
+const int columnas = 7121;
 
-    // Inicializa MPI
-    MPI_Init(&argc, &argv);
+// Funciones de las matrices
+void crearmatriz(std::vector<std::vector<double>>& matriz) {
+    #pragma omp parallel for
+    for (int i = 0; i < filas; ++i) {
+        for (int j = 0; j < columnas; ++j) {
+            matriz[i][j] = 1.0;  // Inicializar a 1.0 como ejemplo
+        }
+    }
+}
 
-    // Obtiene el rango del proceso actual
-    MPI_Comm_rank(MPI_COMM_WORLD, &mi_rango);
+int main() {
+    std::vector<std::vector<double>> alpha(filas, std::vector<double>(columnas, 0.0));
+    std::vector<std::vector<double>> azul(filas, std::vector<double>(columnas, 0.0));
+    std::vector<std::vector<double>> rojo(filas, std::vector<double>(columnas, 0.0));
+    std::vector<std::vector<double>> verde(filas, std::vector<double>(columnas, 0.0));
 
-    // Obtiene el número total de procesos
-    MPI_Comm_size(MPI_COMM_WORLD, &num_procesos);
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        {
+            crearmatriz(alpha);
+        }
+        #pragma omp section
+        {
+            crearmatriz(azul);
+        }
+        #pragma omp section
+        {
+            crearmatriz(rojo);
+        }
+        #pragma omp section
+        {
+            crearmatriz(verde);
+        }
+    }
 
-    // Código específico de cada proceso
-    printf("Hola desde el proceso %d de %d\n", mi_rango, num_procesos);
-
-    // Finaliza MPI
-    MPI_Finalize();
+    printf("Hola desde OpenMP\n");
 
     return EXIT_SUCCESS;
 }
