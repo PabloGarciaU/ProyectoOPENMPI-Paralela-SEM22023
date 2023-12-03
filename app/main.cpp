@@ -38,29 +38,25 @@ void unirmatriz(){
 
 }
 
-// Función para generar una imagen PPM a partir de los datos de una matriz
+// Función para generar una imagen JPEG a partir de los datos de una matriz
 void generarimagen(const std::vector<std::vector<double>>& matriz, const char* nombreArchivo) {
-    FILE* archivo = fopen(nombreArchivo, "w");
+    // Crear una instancia de CImg para representar la imagen
+    cimg_library::CImg<unsigned char> imagen(columnas, filas, 1, 3);
 
-    if (!archivo) {
-        fprintf(stderr, "Error al abrir el archivo: %s\n", nombreArchivo);
-        return;
-    }
-
-    // Encabezado PPM
-    fprintf(archivo, "P3\n%d %d\n255\n", columnas, filas);
-
-    // Mapeo de valores de la matriz a componentes de color y escritura en el archivo
+    // Mapeo de valores de la matriz a componentes de color y asignación a la imagen
     for (int i = 0; i < filas; ++i) {
         for (int j = 0; j < columnas; ++j) {
-            int valor = static_cast<int>(matriz[i][j] * 255.0);
-            fprintf(archivo, "%d %d %d ", valor, valor, valor);
+            unsigned char valor = static_cast<unsigned char>(matriz[i][j]);
+            imagen(j, i, 0) = valor;  // Componente rojo
+            imagen(j, i, 1) = valor;  // Componente verde
+            imagen(j, i, 2) = valor;  // Componente azul
         }
-        fprintf(archivo, "\n");
     }
 
-    fclose(archivo);
+    // Guardar la imagen en formato PNG
+    imagen.save_bmp(nombreArchivo);
 }
+
 
 // Función para llenar la matriz desde un archivo de texto
 void leerarchivo(const std::string& nombreArchivo, std::vector<std::vector<double>>& matriz) {
@@ -119,35 +115,39 @@ int main() {
         #pragma omp section
         {
             crearmatriz(alfa);
-            llenarmatriz(alfa);
+            //llenarmatriz(alfa);
             leerarchivo("alfa.txt", alfa);
             //saludo();
             //valorinicial(alfa);
-            generarimagen(alfa, "alfa.ppm");
+            generarimagen(alfa, "alfa.png");
         }
         #pragma omp section
         {
             crearmatriz(azul);
-            llenarmatriz(azul);
+            //llenarmatriz(azul);
             leerarchivo("azul.txt", azul);
             //saludo();
             //valorinicial(azul);
+            generarimagen(azul, "azul.png");
         }
         #pragma omp section
         {
             crearmatriz(rojo);
-            llenarmatriz(rojo);
+            //llenarmatriz(rojo);
             leerarchivo("rojo.txt", rojo);
             //saludo();
             //valorinicial(rojo);
+            generarimagen(rojo,"rojo.png");
         }
         #pragma omp section
         {
             crearmatriz(verde);
-            llenarmatriz(verde);
+            //llenarmatriz(verde);
             leerarchivo("verde.txt", verde);
             //saludo();
             //valorinicial(verde);
+            generarimagen(verde,"verde.png");
+
         }
     }
 
