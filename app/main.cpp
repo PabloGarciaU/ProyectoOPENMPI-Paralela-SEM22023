@@ -41,22 +41,28 @@ void unirmatriz(){
 // Función para generar una imagen JPEG a partir de los datos de una matriz
 void generarimagen(const std::vector<std::vector<double>>& matriz, const char* nombreArchivo) {
     // Crear una instancia de CImg para representar la imagen
-    cimg_library::CImg<unsigned char> imagen(columnas, filas, 1, 3);
+    cimg_library::CImg<unsigned char> imagen(matriz[0].size(), matriz.size(), 1, 3);
 
     // Mapeo de valores de la matriz a componentes de color y asignación a la imagen
-    for (int i = 0; i < filas; ++i) {
-        for (int j = 0; j < columnas; ++j) {
-            unsigned char valor = static_cast<unsigned char>(matriz[i][j]);
-            imagen(j, i, 0) = valor;  // Componente rojo
-            imagen(j, i, 1) = valor;  // Componente verde
-            imagen(j, i, 2) = valor;  // Componente azul
+    for (size_t i = 0; i < matriz.size(); ++i) {
+        for (size_t j = 0; j < matriz[0].size(); ++j) {
+            // Asegúrate de que los valores estén en el rango [0, 255]
+            double valor = matriz[i][j];
+            valor = std::min(std::max(valor, 0.0), 255.0);
+
+            // Escala los valores al rango [0, 255]
+            valor = (valor / 255.0) * 255.0;
+
+            // Asigna el valor a los componentes de color de la imagen
+            imagen(j, i, 0) = static_cast<unsigned char>(valor);  // Componente rojo
+            imagen(j, i, 1) = static_cast<unsigned char>(valor);  // Componente verde
+            imagen(j, i, 2) = static_cast<unsigned char>(valor);  // Componente azul
         }
     }
 
-    // Guardar la imagen en formato PNG
+    // Guardar la imagen en formato BMP
     imagen.save_bmp(nombreArchivo);
 }
-
 
 // Función para llenar la matriz desde un archivo de texto
 void leerarchivo(const std::string& nombreArchivo, std::vector<std::vector<double>>& matriz) {
@@ -66,9 +72,6 @@ void leerarchivo(const std::string& nombreArchivo, std::vector<std::vector<doubl
         std::cerr << "Error al abrir el archivo: " << nombreArchivo << std::endl;
         return;
     }
-
-    // Reinicializa la matriz con ceros antes de llenarla con nuevos valores
-    matriz.assign(filas, std::vector<double>(columnas, 0.0));
 
     // Lee valores del archivo y llena la matriz
     for (int i = 0; i < filas; ++i) {
