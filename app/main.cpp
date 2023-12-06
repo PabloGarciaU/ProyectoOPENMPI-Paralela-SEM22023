@@ -151,55 +151,56 @@ int main() {
     // Leer el archivo de promedio , verificar, y asignar valores a la matriz promedio
     leerarchivo("promedio.txt", promedio);
     verificarMatriz(promedio);
+    generarimagen(promedio, "promedio.png");
 
     #pragma omp parallel sections
     {
         #pragma omp section
         {
             // Operaciones con alfa
-            crearmatriz(alfa);
+            //crearmatriz(alfa);
             //llenarmatriz(alfa);
-            leerarchivo("alfa.txt", alfa);
+            //leerarchivo("alfa.txt", alfa);
             //saludo();
             //valorinicial(alfa);
-            corregirmatriz(alfa, promedio);
-            verificarMatriz(alfa);
+            //corregirmatriz(alfa, promedio);
+            //verificarMatriz(alfa);
             //generarimagen(alfa, "alfa.png");
         }
         #pragma omp section
         {
             // Operaciones con azul
-            crearmatriz(azul);
+            //crearmatriz(azul);
             //llenarmatriz(azul);
-            leerarchivo("azul.txt", azul);
+            //leerarchivo("azul.txt", azul);
             //saludo();
             //valorinicial(azul);
-            corregirmatriz(azul, promedio);
-            verificarMatriz(azul);
+            //corregirmatriz(azul, promedio);
+            //verificarMatriz(azul);
             //generarimagen(azul, "azul.png");
         }
         #pragma omp section
         {
             // Operaciones con rojo
-            crearmatriz(rojo);
+            //crearmatriz(rojo);
             //llenarmatriz(rojo);
-            leerarchivo("rojo.txt", rojo);
+            //leerarchivo("rojo.txt", rojo);
             //saludo();
             //valorinicial(rojo);
-            corregirmatriz(rojo, promedio);
-            verificarMatriz(rojo);
+            //corregirmatriz(rojo, promedio);
+            //verificarMatriz(rojo);
             //generarimagen(rojo,"rojo.png");
         }
         #pragma omp section
         {
             // Operaciones con verde
-            crearmatriz(verde);
+            //crearmatriz(verde);
             //llenarmatriz(verde);
-            leerarchivo("verde.txt", verde);
+            //leerarchivo("verde.txt", verde);
             //saludo();
             //valorinicial(verde);
-            corregirmatriz(verde, promedio);
-            verificarMatriz(verde);
+            //corregirmatriz(verde, promedio);
+            //verificarMatriz(verde);
             //generarimagen(verde,"verde.png");
         }
     }
