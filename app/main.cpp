@@ -30,12 +30,65 @@ void llenarmatriz(std::vector<std::vector<double>>& matriz) {
     }
 }
 
-void corregirmatriz(){
-
+void corregirmatriz(std::vector<std::vector<double>>& matriz, const std::vector<std::vector<double>>& promedio) {
+    // Reemplazar los "*" en la matriz con los datos de promedio
+    #pragma omp parallel for
+    for (int i = 0; i < filas; ++i) {
+        for (int j = 0; j < columnas; ++j) {
+            if (matriz[i][j] == '*') {
+                // Reemplazar "*" con el valor correspondiente de promedio
+                matriz[i][j] = promedio[i][j];
+            }
+        }
+    }
 }
 
-void unirmatriz(){
+void verificarMatriz(const std::vector<std::vector<double>>& matriz) {
+    bool matrizValida = true;
 
+    // Verificar cada elemento de la matriz
+    for (int i = 0; i < filas; ++i) {
+        for (int j = 0; j < columnas; ++j) {
+            double valor = matriz[i][j];
+
+            // Verificar si el valor está fuera del rango [0, 255]
+            if (valor < 0.0 || valor > 255.0) {
+                matrizValida = false;
+                break;
+            }
+        }
+
+        // Si se encuentra un valor fuera del rango, salir del bucle externo
+        if (!matrizValida) {
+            break;
+        }
+    }
+
+    // Imprimir el mensaje correspondiente
+    if (matrizValida) {
+        std::cout << "Matriz verificada" << std::endl;
+    } else {
+        std::cout << "Matriz con errores" << std::endl;
+    }
+}
+
+// Función para leer el archivo de promedio
+void leerarchivo(const std::string& nombreArchivo, std::vector<std::vector<double>>& matriz) {
+    std::ifstream archivo(nombreArchivo);
+
+    if (!archivo.is_open()) {
+        std::cerr << "Error al abrir el archivo: " << nombreArchivo << std::endl;
+        return;
+    }
+
+    // Lee valores del archivo y llena la matriz
+    for (int i = 0; i < filas; ++i) {
+        for (int j = 0; j < columnas; ++j) {
+            archivo >> matriz[i][j];
+        }
+    }
+
+    archivo.close();
 }
 
 // Función para generar una imagen JPEG a partir de los datos de una matriz
@@ -64,25 +117,6 @@ void generarimagen(const std::vector<std::vector<double>>& matriz, const char* n
     imagen.save_bmp(nombreArchivo);
 }
 
-// Función para llenar la matriz desde un archivo de texto
-void leerarchivo(const std::string& nombreArchivo, std::vector<std::vector<double>>& matriz) {
-    std::ifstream archivo(nombreArchivo);
-
-    if (!archivo.is_open()) {
-        std::cerr << "Error al abrir el archivo: " << nombreArchivo << std::endl;
-        return;
-    }
-
-    // Lee valores del archivo y llena la matriz
-    for (int i = 0; i < filas; ++i) {
-        for (int j = 0; j < columnas; ++j) {
-            archivo >> matriz[i][j];
-        }
-    }
-
-    archivo.close();
-}
-
 void saludo() {
     int thread_id = omp_get_thread_num();
     printf("Hola desde OpenMP en el hilo %d\n", thread_id);
@@ -108,52 +142,67 @@ int main() {
     std::vector<std::vector<double>> azul(filas, std::vector<double>(columnas, 0.0));
     std::vector<std::vector<double>> rojo(filas, std::vector<double>(columnas, 0.0));
     std::vector<std::vector<double>> verde(filas, std::vector<double>(columnas, 0.0));
-    std::vector<std::vector<double>> resultado(filas, std::vector<double>(columnas, 0.0));
+    std::vector<std::vector<double>> promedio(filas, std::vector<double>(columnas, 0.0));
+    std::vector<std::vector<double>> total(filas, std::vector<double>(columnas, 0.0)); 
 
     // Se establece el número de hilos para OpenMP
     omp_set_num_threads(4);
+
+    // Leer el archivo de promedio , verificar, y asignar valores a la matriz promedio
+    leerarchivo("promedio.txt", promedio);
+    verificarMatriz(promedio);
 
     #pragma omp parallel sections
     {
         #pragma omp section
         {
+            // Operaciones con alfa
             crearmatriz(alfa);
             //llenarmatriz(alfa);
             leerarchivo("alfa.txt", alfa);
             //saludo();
             //valorinicial(alfa);
-            generarimagen(alfa, "alfa.png");
+            corregirmatriz(alfa, promedio);
+            verificarMatriz(alfa);
+            //generarimagen(alfa, "alfa.png");
         }
         #pragma omp section
         {
+            // Operaciones con azul
             crearmatriz(azul);
             //llenarmatriz(azul);
             leerarchivo("azul.txt", azul);
             //saludo();
             //valorinicial(azul);
-            generarimagen(azul, "azul.png");
+            corregirmatriz(azul, promedio);
+            verificarMatriz(azul);
+            //generarimagen(azul, "azul.png");
         }
         #pragma omp section
         {
+            // Operaciones con rojo
             crearmatriz(rojo);
             //llenarmatriz(rojo);
             leerarchivo("rojo.txt", rojo);
             //saludo();
             //valorinicial(rojo);
-            generarimagen(rojo,"rojo.png");
+            corregirmatriz(rojo, promedio);
+            verificarMatriz(rojo);
+            //generarimagen(rojo,"rojo.png");
         }
         #pragma omp section
         {
+            // Operaciones con verde
             crearmatriz(verde);
             //llenarmatriz(verde);
             leerarchivo("verde.txt", verde);
             //saludo();
             //valorinicial(verde);
-            generarimagen(verde,"verde.png");
-
+            corregirmatriz(verde, promedio);
+            verificarMatriz(verde);
+            //generarimagen(verde,"verde.png");
         }
     }
 
     return EXIT_SUCCESS;
-
 }

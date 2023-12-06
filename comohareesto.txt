@@ -3,7 +3,7 @@
 - Crear el main ✔️
 - Crear la matriz (paralelo) ✔️
 - Leer el archivo y llenar la matriz (paralelo) ✔️
-- Corregir los errores de la matriz (paralelo)
+- Corregir los errores de la matriz (paralelo) ✔️
 - Generar la imagen de cada matriz (paralelo)
 - Unir los datos de las 4 matrices para la imagen final (ni idea como)
 - Generar la imagen de la matriz final
