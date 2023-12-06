@@ -6,8 +6,8 @@
 #include <vector>
 #include "CImg.h"
 
-const std::vector<std::vector<double>>::size_type filas = 10681;
-const std::vector<double>::size_type columnas = 7121;
+const size_t filas = 10681;
+const size_t columnas = 7121;
 
 void leerarchivo(const std::string& nombreArchivo, std::vector<std::vector<double>>& matriz, const std::vector<std::vector<double>>& matrizPromedio) {
     std::ifstream archivo(nombreArchivo);
@@ -18,9 +18,8 @@ void leerarchivo(const std::string& nombreArchivo, std::vector<std::vector<doubl
     }
 
     // Lee valores del archivo y llena la matriz
-    #pragma omp parallel for collapse(2) shared(matriz, matrizPromedio)
-    for (std::vector<std::vector<double>>::size_type i = 0; i < matriz.size(); ++i) {
-        for (std::vector<double>::size_type j = 0; j < matriz[i].size(); ++j) {
+    for (size_t i = 0; i < matriz.size(); ++i) {
+        for (size_t j = 0; j < matriz[i].size(); ++j) {
             std::string valor;
             archivo >> valor;
 
@@ -37,30 +36,23 @@ void leerarchivo(const std::string& nombreArchivo, std::vector<std::vector<doubl
     archivo.close();
 }
 
-void generarimagen(const std::vector<std::vector<double>>& matriz, const char* nombreArchivo) {
-    cimg_library::CImg<unsigned char> imagen(matriz[0].size(), matriz.size(), 1, 3);
+void generarimagen(const std::vector<std::vector<double>>& matriz, const std::string& nombreImagen) {
+    // Crea la imagen
+    cimg_library::CImg<unsigned char> imagen(columnas, filas, 1, 3);
 
-    // Mapeo de valores de la matriz a componentes de color y asignación a la imagen
-    #pragma omp parallel for collapse(2) shared(matriz)
-    for (std::vector<std::vector<double>>::size_type i = 0; i < matriz.size(); ++i) {
-        for (std::vector<double>::size_type j = 0; j < matriz[0].size(); ++j) {
-            // Asegúrate de que los valores estén en el rango [0, 255]
-            double valor = matriz[i][j];
-            valor = std::min(std::max(valor, 0.0), 255.0);
-
-            // Escala los valores al rango [0, 255]
-            valor = (valor / 255.0) * 255.0;
-
-            // Asigna el valor a los componentes de color de la imagen
-            imagen(j, i, 0) = static_cast<unsigned char>(valor);  // Componente rojo
-            imagen(j, i, 1) = static_cast<unsigned char>(valor);  // Componente verde
-            imagen(j, i, 2) = static_cast<unsigned char>(valor);  // Componente azul
+    // Llena la imagen con los valores de la matriz
+    for (size_t i = 0; i < matriz.size(); ++i) {
+        for (size_t j = 0; j < matriz[i].size(); ++j) {
+            imagen(j, i, 0) = static_cast<unsigned char>(matriz[i][j]);
+            imagen(j, i, 1) = static_cast<unsigned char>(matriz[i][j]);
+            imagen(j, i, 2) = static_cast<unsigned char>(matriz[i][j]);
         }
     }
 
-    // Guardar la imagen en formato png
-    imagen.save_png(nombreArchivo);
+    // Guarda la imagen
+    imagen.save_png(nombreImagen.c_str());
 }
+
 
 int main() {
     // Inicializa las matrices
@@ -83,22 +75,18 @@ int main() {
         #pragma omp section
         {
             leerarchivo("alfa.txt", alfa, promedio);
-            generarimagen(alfa, "alfa.png");
         }
         #pragma omp section
         {
             leerarchivo("azul.txt", azul, promedio);
-            generarimagen(azul, "azul.png");
         }
         #pragma omp section
         {
-            leerarchivo("rojo.txt", rojo, promedio);
-            generarimagen(rojo, "rojo.png");    
+            leerarchivo("rojo.txt", rojo, promedio);   
         }
         #pragma omp section
         {
             leerarchivo("verde.txt", verde, promedio);
-            generarimagen(verde, "verde.png");
         }
     }
 
