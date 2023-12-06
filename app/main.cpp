@@ -9,7 +9,11 @@
 const size_t filas = 10681;
 const size_t columnas = 7121;
 
-void leerarchivo(const std::string& nombreArchivo, std::vector<std::vector<double>>& matriz, const std::vector<std::vector<double>>& matrizPromedio) {
+#include <fstream>
+#include <iostream>
+#include <vector>
+
+void leerarchivo(const std::string& nombreArchivo, std::vector<std::vector<double>>& matriz) {
     std::ifstream archivo(nombreArchivo);
 
     if (!archivo.is_open()) {
@@ -24,8 +28,9 @@ void leerarchivo(const std::string& nombreArchivo, std::vector<std::vector<doubl
             archivo >> valor;
 
             if (valor == "*") {
-                // Reemplaza '*' con el valor correspondiente en el archivo promedio
-                matriz[i][j] = matrizPromedio[i][j];
+                // En caso de '*', puedes manejarlo de alguna manera específica
+                // Por ahora, simplemente asignamos un valor predeterminado (0.0)
+                matriz[i][j] = 0.0;
             } else {
                 // Convierte el valor de string a double
                 matriz[i][j] = std::stod(valor);
@@ -34,6 +39,24 @@ void leerarchivo(const std::string& nombreArchivo, std::vector<std::vector<doubl
     }
 
     archivo.close();
+}
+
+bool verificarMatriz(const std::vector<std::vector<double>>& matriz) {
+    for (size_t i = 0; i < matriz.size(); ++i) {
+        for (size_t j = 0; j < matriz[i].size(); ++j) {
+            double valor = matriz[i][j];
+
+            if (valor < 0 || valor > 255) {
+                // Se encontró un valor fuera del rango
+                std::cout << "Valor fuera del rango en la posición (" << i << ", " << j << "): " << valor << std::endl;
+                return false;
+            }
+        }
+    }
+
+    // Todos los valores están en el rango [0, 255]
+    std::cout << "Todos los valores están en el rango [0, 255]." << std::endl;
+    return true;
 }
 
 void generarimagen(const std::vector<std::vector<double>>& matriz, const std::string& nombreImagen) {
@@ -53,7 +76,6 @@ void generarimagen(const std::vector<std::vector<double>>& matriz, const std::st
     imagen.save_png(nombreImagen.c_str());
 }
 
-
 int main() {
     // Inicializa las matrices
     std::vector<std::vector<double>> alfa(filas, std::vector<double>(columnas, 0.0));
@@ -69,24 +91,23 @@ int main() {
     {
         #pragma omp section
         {
-            leerarchivo("promedio.txt", promedio, promedio);
-            generarimagen(promedio, "promedio.png");
+            leerarchivo("alfa.txt", alfa);
+            verificarMatriz(alfa);
         }
         #pragma omp section
         {
-            leerarchivo("alfa.txt", alfa, promedio);
+            leerarchivo("azul.txt", azul);
+            verificarMatriz(azul);
         }
         #pragma omp section
         {
-            leerarchivo("azul.txt", azul, promedio);
+            leerarchivo("rojo.txt", rojo);
+            verificarMatriz(rojo);   
         }
         #pragma omp section
         {
-            leerarchivo("rojo.txt", rojo, promedio);   
-        }
-        #pragma omp section
-        {
-            leerarchivo("verde.txt", verde, promedio);
+            leerarchivo("verde.txt", verde);
+            verificarMatriz(verde);
         }
     }
 
