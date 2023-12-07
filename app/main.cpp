@@ -55,7 +55,7 @@ void UnirMatrices(const std::vector<std::vector<double>>& alfa,
     // Combina las matrices asegurándose de que los valores estén en el rango [0, 255]
     for (size_t i = 0; i < alfa.size(); ++i) {
         for (size_t j = 0; j < alfa[i].size(); ++j) {
-            total[i][j] = alfa[i][j] + rojo[i][j] + azul[i][j] + verde[i][j];
+            total[i][j] = (alfa[i][j] + rojo[i][j] + azul[i][j] + verde[i][j])/4;
 
             // Ajusta los valores para asegurarse de que estén en el rango [0, 255]
             if (total[i][j] < 0) {
@@ -155,19 +155,8 @@ int main() {
             LimpiarValoresPerdidos(promedio, azul);
             LimpiarValoresPerdidos(promedio, rojo);
             LimpiarValoresPerdidos(promedio, verde);
-            VerificarMatriz(promedio);
-            VerificarMatriz(alfa);
-            VerificarMatriz(azul);
-            VerificarMatriz(rojo);
-            VerificarMatriz(verde);
             UnirMatrices(alfa, rojo, azul, verde, galaxia);
-            VerificarMatriz(galaxia);
-            GenerarImagen(promedio, "promedio.png");
             GenerarImagen(galaxia, "galaxia.png");
-            GenerarImagen(alfa, "alfa.png");
-            GenerarImagen(azul, "azul.png");
-            GenerarImagen(rojo, "rojo.png");
-            GenerarImagen(verde, "verde.png");
         }
     }
     return EXIT_SUCCESS;
