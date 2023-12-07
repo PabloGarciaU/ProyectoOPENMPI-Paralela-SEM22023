@@ -13,7 +13,7 @@ const size_t columnas = 7121;
 #include <iostream>
 #include <vector>
 
-void leerarchivo(const std::string& nombreArchivo, std::vector<std::vector<double>>& matriz) {
+void LeerArchivo(const std::string& nombreArchivo, std::vector<std::vector<double>>& matriz) {
     std::ifstream archivo(nombreArchivo);
 
     if (!archivo.is_open()) {
@@ -28,9 +28,8 @@ void leerarchivo(const std::string& nombreArchivo, std::vector<std::vector<doubl
             archivo >> valor;
 
             if (valor == "*") {
-                // En caso de '*', puedes manejarlo de alguna manera específica
-                // Por ahora, simplemente asignamos un valor predeterminado (0.0)
-                matriz[i][j] = 0.0;
+                // Reemplaza '*' con -1
+                matriz[i][j] = -1;
             } else {
                 // Convierte el valor de string a double
                 matriz[i][j] = std::stod(valor);
@@ -41,7 +40,7 @@ void leerarchivo(const std::string& nombreArchivo, std::vector<std::vector<doubl
     archivo.close();
 }
 
-bool verificarMatriz(const std::vector<std::vector<double>>& matriz) {
+bool VerificarMatriz(const std::vector<std::vector<double>>& matriz) {
     for (size_t i = 0; i < matriz.size(); ++i) {
         for (size_t j = 0; j < matriz[i].size(); ++j) {
             double valor = matriz[i][j];
@@ -59,7 +58,7 @@ bool verificarMatriz(const std::vector<std::vector<double>>& matriz) {
     return true;
 }
 
-void generarimagen(const std::vector<std::vector<double>>& matriz, const std::string& nombreImagen) {
+void GenerarImagen(const std::vector<std::vector<double>>& matriz, const std::string& nombreImagen) {
     // Crea la imagen
     cimg_library::CImg<unsigned char> imagen(columnas, filas, 1, 3);
 
@@ -72,7 +71,7 @@ void generarimagen(const std::vector<std::vector<double>>& matriz, const std::st
         }
     }
 
-    // Guarda la imagen
+    // Guarda la imagen en formato PNG
     imagen.save_png(nombreImagen.c_str());
 }
 
@@ -83,6 +82,7 @@ int main() {
     std::vector<std::vector<double>> rojo(filas, std::vector<double>(columnas, 0.0));
     std::vector<std::vector<double>> verde(filas, std::vector<double>(columnas, 0.0));
     std::vector<std::vector<double>> promedio(filas, std::vector<double>(columnas, 0.0));
+    std::vector<std::vector<double>> total(filas, std::vector<double>(columnas, 0.0));
 
     // Se establece el número de hilos para OpenMP
     omp_set_num_threads(4);
@@ -91,25 +91,18 @@ int main() {
     {
         #pragma omp section
         {
-            leerarchivo("alfa.txt", alfa);
-            verificarMatriz(alfa);
-        }
-        #pragma omp section
-        {
-            leerarchivo("azul.txt", azul);
-            verificarMatriz(azul);
-        }
-        #pragma omp section
-        {
-            leerarchivo("rojo.txt", rojo);
-            verificarMatriz(rojo);   
-        }
-        #pragma omp section
-        {
-            leerarchivo("verde.txt", verde);
-            verificarMatriz(verde);
+            LeerArchivo("promedio.txt", promedio);
+            LeerArchivo("alfa.txt", alfa);
+            LeerArchivo("azul.txt", azul);
+            LeerArchivo("rojo.txt", rojo);
+            LeerArchivo("verde.txt", verde);
+            VerificarMatriz(promedio);
+            VerificarMatriz(alfa);
+            VerificarMatriz(azul);
+            VerificarMatriz(rojo);
+            VerificarMatriz(verde);
+            GenerarImagen(promedio, "promedio.png");
         }
     }
-
     return EXIT_SUCCESS;
 }
