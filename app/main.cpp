@@ -163,7 +163,11 @@ int main() {
             UnirMatrices(alfa, rojo, azul, verde, galaxia);
             VerificarMatriz(galaxia);
             GenerarImagen(promedio, "promedio.png");
-            //GenerarImagen(galaxia, "galaxia.png");
+            GenerarImagen(galaxia, "galaxia.png");
+            GenerarImagen(alfa, "alfa.png");
+            GenerarImagen(azul, "azul.png");
+            GenerarImagen(rojo, "rojo.png");
+            GenerarImagen(verde, "verde.png");
         }
     }
     return EXIT_SUCCESS;
