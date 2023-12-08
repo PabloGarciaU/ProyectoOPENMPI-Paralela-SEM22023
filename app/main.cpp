@@ -37,37 +37,6 @@ void LeerArchivo(const std::string& nombreArchivo, std::vector<std::vector<doubl
     archivo.close();
 }
 
-void UnirMatrices(const std::vector<std::vector<double>>& alfa,
-                  const std::vector<std::vector<double>>& rojo,
-                  const std::vector<std::vector<double>>& azul,
-                  const std::vector<std::vector<double>>& verde,
-                  std::vector<std::vector<double>>& total) {
-    // Asegura que todas las matrices tengan las mismas dimensiones
-    if (alfa.size() != rojo.size() || alfa.size() != azul.size() || alfa.size() != verde.size() ||
-        alfa[0].size() != rojo[0].size() || alfa[0].size() != azul[0].size() || alfa[0].size() != verde[0].size()) {
-        std::cerr << "Las dimensiones de las matrices no son iguales." << std::endl;
-        return;
-    }
-
-    // Inicializa la matriz total con ceros
-    total.resize(alfa.size(), std::vector<double>(alfa[0].size(), 0.0));
-
-    // Combina las matrices asegurándose de que los valores estén en el rango [0, 255]
-    for (size_t i = 0; i < alfa.size(); ++i) {
-        for (size_t j = 0; j < alfa[i].size(); ++j) {
-            total[i][j] = (alfa[i][j] + rojo[i][j] + azul[i][j] + verde[i][j])/4;
-
-            // Ajusta los valores para asegurarse de que estén en el rango [0, 255]
-            if (total[i][j] < 0) {
-                total[i][j] = 0;
-            } else if (total[i][j] > 255) {
-                total[i][j] = 255;
-            }
-        }
-    }
-}
-
-
 bool VerificarMatriz(const std::vector<std::vector<double>>& matriz) {
     for (size_t i = 0; i < matriz.size(); ++i) {
         for (size_t j = 0; j < matriz[i].size(); ++j) {
@@ -86,49 +55,75 @@ bool VerificarMatriz(const std::vector<std::vector<double>>& matriz) {
     return true;
 }
 
-// Función para generar una imagen a partir de los datos de una matriz
-void GenerarImagen(const std::vector<std::vector<double>>& matriz, const char* nombreArchivo) {
-    // Crear una instancia de CImg para representar la imagen
-    cimg_library::CImg<unsigned char> imagen(matriz[0].size(), matriz.size(), 1, 3);
-
-    // Mapeo de valores de la matriz a componentes de color y asignación a la imagen
-    for (size_t i = 0; i < matriz.size(); ++i) {
-        for (size_t j = 0; j < matriz[0].size(); ++j) {
-            // Asegúrate de que los valores estén en el rango [0, 255]
-            double valor = matriz[i][j];
-            valor = std::min(std::max(valor, 0.0), 255.0);
-
-            // Escala los valores al rango [0, 255]
-            valor = (valor / 255.0) * 255.0;
-
-            // Asigna el valor a los componentes de color de la imagen
-            imagen(j, i, 0) = static_cast<unsigned char>(valor);  // Componente rojo
-            imagen(j, i, 1) = static_cast<unsigned char>(valor);  // Componente verde
-            imagen(j, i, 2) = static_cast<unsigned char>(valor);  // Componente azul
-        }
-    }
-
-    // Guardar la imagen en formato bmp
-    imagen.save_bmp(nombreArchivo);
-}
-
 void LimpiarValoresPerdidos(const std::vector<std::vector<double>>& matrizPromedio,
-                   std::vector<std::vector<double>>& matriz) {
+                             std::vector<std::vector<double>>& rojo,
+                             std::vector<std::vector<double>>& verde,
+                             std::vector<std::vector<double>>& azul,
+                             std::vector<std::vector<double>>& matriz, int caso) {
     // Asegura que las matrices tengan las mismas dimensiones
     if (matriz.size() != matrizPromedio.size() || matriz[0].size() != matrizPromedio[0].size()) {
         std::cerr << "Las dimensiones de las matrices no son iguales." << std::endl;
         return;
     }
+
     // Procesa los valores perdidos usando la fórmula del promedio ponderado
     for (size_t i = 0; i < matriz.size(); ++i) {
         for (size_t j = 0; j < matriz[i].size(); ++j) {
             if (matriz[i][j] == -1) {
-                // Calcula el valor perdido utilizando la fórmula del promedio ponderado
-                matriz[i][j] = matrizPromedio[i][j];
+                // Calcula el valor perdido utilizando la fórmula del promedio ponderado con el peso adecuado
+                double valorCalculado = 0.0;
+                switch (caso) {
+                    case 1: // Para el caso de la matriz roja
+                        if (azul[i][j] != -1 && verde[i][j] != -1) {
+                            valorCalculado = (matrizPromedio[i][j] - (0.59 * verde[i][j]) + (0.11 * azul[i][j])) / 0.3;
+                        }
+                        break;
+                    case 2:// Para el caso de la matriz verde
+                        if (rojo[i][j] != -1 && azul[i][j] != -1) {
+                            valorCalculado = (matrizPromedio[i][j] - (0.3 * rojo[i][j]) + (0.11 * azul[i][j])) / 0.59;
+                        }
+                        break;
+                    case 3:// para el caso de la matriz azul
+                        if (rojo[i][j] != -1 && verde[i][j] != -1) {
+                            valorCalculado = (matrizPromedio[i][j] - (0.3 * rojo[i][j]) + (0.59 * verde[i][j])) / 0.11;
+                        }
+                        break;
+                    default:
+                        std::cerr << "Caso no reconocido." << std::endl;
+                        return;
+                }
+
+                // Asegurarse de que el valor esté dentro del rango permitido (0 a 255)
+                valorCalculado = std::max(0.0, std::min(valorCalculado, 255.0));
+                matriz[i][j] = valorCalculado;
             }
         }
     }
 }
+
+void GenerarImagenColor(const std::vector<std::vector<double>>& alfa,
+                        const std::vector<std::vector<double>>& azul,
+                        const std::vector<std::vector<double>>& rojo,
+                        const std::vector<std::vector<double>>& verde,
+                        const char* nombreArchivo) {
+    // Crea una instancia de CImg para representar la imagen a color
+    cimg_library::CImg<unsigned char> imagen(alfa[0].size(), alfa.size(), 1, 3);
+
+    // Mapeo de valores de las matrices a componentes de color y asignación a la imagen
+    for (size_t i = 0; i < alfa[0].size(); ++i) {
+        for (size_t j = 0; j < alfa.size(); ++j) {
+            // Asigna los valores a los componentes de color de la imagen
+            imagen(i, j, 0, 0) = static_cast<unsigned char>(rojo[j][i]);   // Componente rojo
+            imagen(i, j, 0, 1) = static_cast<unsigned char>(verde[j][i]);  // Componente verde
+            imagen(i, j, 0, 2) = static_cast<unsigned char>(azul[j][i]);   // Componente azul
+        }
+    }
+
+    // Guardar la imagen en formato bmp
+    imagen.save_bmp(nombreArchivo);
+    std::cout << "Imagen generada, que la disfrute! :) " << nombreArchivo << std::endl;
+}
+
 
 int main() {
     // Inicializa las matrices
@@ -137,27 +132,39 @@ int main() {
     std::vector<std::vector<double>> rojo(filas, std::vector<double>(columnas, 0.0));
     std::vector<std::vector<double>> verde(filas, std::vector<double>(columnas, 0.0));
     std::vector<std::vector<double>> promedio(filas, std::vector<double>(columnas, 0.0));
-    std::vector<std::vector<double>> galaxia(filas, std::vector<double>(columnas, 0.0));
 
     // Se establece el número de hilos para OpenMP
     omp_set_num_threads(4);
-
+    // Es necesario que antes de paralelizar este valor se carge antes solo, ya que es el pilar de las demas formulas
+    LeerArchivo("promedio.txt", promedio);
+    LeerArchivo("alfa.txt", alfa);
     #pragma omp parallel sections
     {
         #pragma omp section
         {
-            LeerArchivo("promedio.txt", promedio);
-            LeerArchivo("alfa.txt", alfa);
-            LeerArchivo("azul.txt", azul);
+            VerificarMatriz(alfa);
+        }
+        #pragma omp section
+        {
             LeerArchivo("rojo.txt", rojo);
+            LimpiarValoresPerdidos(promedio, rojo, verde, azul, rojo, 1);
+            VerificarMatriz(rojo);
+            
+        }
+        #pragma omp section
+        {
             LeerArchivo("verde.txt", verde);
-            LimpiarValoresPerdidos(promedio, alfa);
-            LimpiarValoresPerdidos(promedio, azul);
-            LimpiarValoresPerdidos(promedio, rojo);
-            LimpiarValoresPerdidos(promedio, verde);
-            UnirMatrices(alfa, rojo, azul, verde, galaxia);
-            GenerarImagen(galaxia, "galaxia.png");
+            LimpiarValoresPerdidos(promedio, rojo, verde, azul, verde, 2);
+            VerificarMatriz(verde);
+        }
+        #pragma omp section
+        {
+            LeerArchivo("azul.txt", azul);
+            LimpiarValoresPerdidos(promedio, rojo, verde, azul, azul, 3);
+            VerificarMatriz(azul);
         }
     }
+    // Finalmente con todas las matrices limpiadas y corregidas se genera la imagen final en ARGB
+    GenerarImagenColor(alfa, azul, rojo, verde, "galaxia.png");
     return EXIT_SUCCESS;
 }

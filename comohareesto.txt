@@ -20,8 +20,8 @@ Leerarchivo() ✔️
 llenarmatriz() ✔️
 crearmatriz() ✔️
 corregirmatriz()
-unirmatriz()
-generarimagen()
+unirmatriz() ✔️
+generarimagen() ✔️
 
 //  COMO FUNCIONARA
 La idea de esto es crear la matriz, 
