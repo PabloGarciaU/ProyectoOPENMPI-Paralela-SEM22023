@@ -147,20 +147,20 @@ int main() {
         #pragma omp section
         {
             LeerArchivo("rojo.txt", rojo);
-            LimpiarValoresPerdidos(promedio, rojo, verde, azul, rojo, 1);
+            //LimpiarValoresPerdidos(promedio, rojo, verde, azul, rojo, 1);
             VerificarMatriz(rojo);
             
         }
         #pragma omp section
         {
             LeerArchivo("verde.txt", verde);
-            LimpiarValoresPerdidos(promedio, rojo, verde, azul, verde, 2);
+            //LimpiarValoresPerdidos(promedio, rojo, verde, azul, verde, 2);
             VerificarMatriz(verde);
         }
         #pragma omp section
         {
             LeerArchivo("azul.txt", azul);
-            LimpiarValoresPerdidos(promedio, rojo, verde, azul, azul, 3);
+            //LimpiarValoresPerdidos(promedio, rojo, verde, azul, azul, 3);
             VerificarMatriz(azul);
         }
     }
