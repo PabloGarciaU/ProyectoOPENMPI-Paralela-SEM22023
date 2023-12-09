@@ -1,0 +1,4 @@
+//  Comandos para compilar
+cd app
+make
+time mpirun -hostfile maquinas.txt dist/programa alfa.txt rojo.txt verde.txt azul.txt

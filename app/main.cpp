@@ -7,8 +7,8 @@
 #include "CImg.h"
 #include <string>
 
-const size_t filas = 10681;
-const size_t columnas = 7121;
+const size_t filas = 7121;
+const size_t columnas = 10681;
 
 void LeerArchivo(const std::string& nombreArchivo, std::vector<std::vector<int>>& matriz) {
     std::ifstream archivo(nombreArchivo);
@@ -55,11 +55,11 @@ bool VerificarMatriz(const std::vector<std::vector<int>>& matriz) {
     return true;
 }
 
-void LimpiarValoresPerdidos(std::vector<std::vector<int>>& matrizPromedio,
-                             std::vector<std::vector<int>>& alfa,
-                             std::vector<std::vector<int>>& rojo,
-                             std::vector<std::vector<int>>& verde,
-                             std::vector<std::vector<int>>& azul, int caso) {
+void LimpiarValoresPerdidosRojo(std::vector<std::vector<int>>& matrizPromedio,
+                                std::vector<std::vector<int>>& alfa,
+                                std::vector<std::vector<int>>& rojo,
+                                std::vector<std::vector<int>>& verde,
+                                std::vector<std::vector<int>>& azul) {
     // Asegura que las matrices tengan las mismas dimensiones
     if (matrizPromedio.size() != alfa.size() || matrizPromedio[0].size() != alfa[0].size() ||
         matrizPromedio.size() != rojo.size() || matrizPromedio[0].size() != rojo[0].size() ||
@@ -69,48 +69,80 @@ void LimpiarValoresPerdidos(std::vector<std::vector<int>>& matrizPromedio,
         return;
     }
 
-    // Procesa los valores perdidos usando la fórmula correspondiente al caso
+    // Procesa los valores perdidos para la matriz rojo
     for (size_t i = 0; i < matrizPromedio.size(); ++i) {
         for (size_t j = 0; j < matrizPromedio[0].size(); ++j) {
-            if (rojo[i][j] < 0 || verde[i][j] < 0 || azul[i][j] < 0) {
-                // Calcula el valor perdido según el caso
-                double valorCalculadoRojo = 0;
-                double valorCalculadoVerde = 0;
-                double valorCalculadoAzul = 0;
+            if (rojo[i][j] < 0) {
+                // Calcula el valor perdido en la matriz rojo utilizando la fórmula
+                double valorCalculadoRojo = (alfa[i][j] != -1) ? (matrizPromedio[i][j] - (0.59 * verde[i][j]) + (0.11 * azul[i][j])) / 0.3 : 0;
 
-                switch (caso) {
-                    case 1: // Para el caso de la matriz roja
-                        if (azul[i][j] != -1 && verde[i][j] != -1) {
-                            valorCalculadoRojo = (matrizPromedio[i][j] - (0.59 * verde[i][j]) + (0.11 * azul[i][j])) / 0.3;
-                        }
-                        else valorCalculadoRojo = matrizPromedio[i][j];
-                        break;
-                    case 2:// Para el caso de la matriz verde
-                        if (rojo[i][j] != -1 && azul[i][j] != -1) {
-                            valorCalculadoVerde = (matrizPromedio[i][j] - (0.3 * rojo[i][j]) + (0.11 * azul[i][j])) / 0.59;
-                        }
-                        else valorCalculadoVerde = matrizPromedio[i][j];
-                        break;
-                    case 3:// para el caso de la matriz azul
-                        if (rojo[i][j] != -1 && verde[i][j] != -1) {
-                            valorCalculadoAzul = (matrizPromedio[i][j] - (0.3 * rojo[i][j]) + (0.59 * verde[i][j])) / 0.11;
-                        }
-                        else valorCalculadoAzul = matrizPromedio[i][j];
-                        break;
-                    default:
-                        std::cerr << "Caso no reconocido." << std::endl;
-                        return;
-                }
-
-                // Asegurarse de que los valores estén dentro del rango permitido (0 a 255)
+                // Asegura que el valor esté dentro del rango permitido (0 a 255)
                 valorCalculadoRojo = std::max(0.0, std::min(valorCalculadoRojo, 255.0));
+
+                // Asigna el valor calculado a la matriz rojo
+                rojo[i][j] = static_cast<int>(valorCalculadoRojo);
+            }
+        }
+    }
+}
+
+void LimpiarValoresPerdidosVerde(std::vector<std::vector<int>>& matrizPromedio,
+                                 std::vector<std::vector<int>>& alfa,
+                                 std::vector<std::vector<int>>& rojo,
+                                 std::vector<std::vector<int>>& verde,
+                                 std::vector<std::vector<int>>& azul) {
+    // Asegura que las matrices tengan las mismas dimensiones
+    if (matrizPromedio.size() != alfa.size() || matrizPromedio[0].size() != alfa[0].size() ||
+        matrizPromedio.size() != rojo.size() || matrizPromedio[0].size() != rojo[0].size() ||
+        matrizPromedio.size() != verde.size() || matrizPromedio[0].size() != verde[0].size() ||
+        matrizPromedio.size() != azul.size() || matrizPromedio[0].size() != azul[0].size()) {
+        std::cerr << "Las dimensiones de las matrices no son iguales." << std::endl;
+        return;
+    }
+
+    // Procesa los valores perdidos para la matriz verde
+    for (size_t i = 0; i < matrizPromedio.size(); ++i) {
+        for (size_t j = 0; j < matrizPromedio[0].size(); ++j) {
+            if (verde[i][j] < 0) {
+                // Calcula el valor perdido en la matriz verde utilizando la fórmula
+                double valorCalculadoVerde = (alfa[i][j] != -1) ? (matrizPromedio[i][j] - (0.3 * rojo[i][j]) + (0.11 * azul[i][j])) / 0.59 : 0;
+
+                // Asegura que el valor esté dentro del rango permitido (0 a 255)
                 valorCalculadoVerde = std::max(0.0, std::min(valorCalculadoVerde, 255.0));
+
+                // Asigna el valor calculado a la matriz verde
+                verde[i][j] = static_cast<int>(valorCalculadoVerde);
+            }
+        }
+    }
+}
+
+void LimpiarValoresPerdidosAzul(std::vector<std::vector<int>>& matrizPromedio,
+                                std::vector<std::vector<int>>& alfa,
+                                std::vector<std::vector<int>>& rojo,
+                                std::vector<std::vector<int>>& verde,
+                                std::vector<std::vector<int>>& azul) {
+    // Asegura que las matrices tengan las mismas dimensiones
+    if (matrizPromedio.size() != alfa.size() || matrizPromedio[0].size() != alfa[0].size() ||
+        matrizPromedio.size() != rojo.size() || matrizPromedio[0].size() != rojo[0].size() ||
+        matrizPromedio.size() != verde.size() || matrizPromedio[0].size() != verde[0].size() ||
+        matrizPromedio.size() != azul.size() || matrizPromedio[0].size() != azul[0].size()) {
+        std::cerr << "Las dimensiones de las matrices no son iguales." << std::endl;
+        return;
+    }
+
+    // Procesa los valores perdidos para la matriz azul
+    for (size_t i = 0; i < matrizPromedio.size(); ++i) {
+        for (size_t j = 0; j < matrizPromedio[0].size(); ++j) {
+            if (azul[i][j] < 0) {
+                // Calcula el valor perdido en la matriz azul utilizando la fórmula
+                double valorCalculadoAzul = (alfa[i][j] != -1) ? (matrizPromedio[i][j] - (0.3 * rojo[i][j]) + (0.59 * verde[i][j])) / 0.11 : 0;
+
+                // Asegura que el valor esté dentro del rango permitido (0 a 255)
                 valorCalculadoAzul = std::max(0.0, std::min(valorCalculadoAzul, 255.0));
 
-                // Asigna los valores calculados a las matrices correspondientes
-                rojo[i][j] = (rojo[i][j] < 0) ? static_cast<int>(valorCalculadoRojo) : rojo[i][j];
-                verde[i][j] = (verde[i][j] < 0) ? static_cast<int>(valorCalculadoVerde) : verde[i][j];
-                azul[i][j] = (azul[i][j] < 0) ? static_cast<int>(valorCalculadoAzul) : azul[i][j];
+                // Asigna el valor calculado a la matriz azul
+                azul[i][j] = static_cast<int>(valorCalculadoAzul);
             }
         }
     }
@@ -130,15 +162,15 @@ void GenerarImagenColor(const std::vector<std::vector<int>>& alfa,
     }
 
     // Crea una imagen en blanco de filas x columnas
-    cimg_library::CImg<unsigned char> imagen(filas, columnas, 1, 3, 0);
+    cimg_library::CImg<unsigned char> imagen(alfa[0].size(), alfa.size(), 1, 3, 0);
 
     // Recorre las matrices y asigna los valores a la imagen
     for (size_t i = 0; i < alfa.size(); ++i) {
         for (size_t j = 0; j < alfa[i].size(); ++j) {
             // Asegura que los valores estén en el rango [0, 255]
-            imagen(i, j, 0, 0) = static_cast<unsigned char>(std::max(0, std::min(255, rojo[i][j])));
-            imagen(i, j, 0, 1) = static_cast<unsigned char>(std::max(0, std::min(255, verde[i][j])));
-            imagen(i, j, 0, 2) = static_cast<unsigned char>(std::max(0, std::min(255, azul[i][j])));
+            imagen(j, i, 0, 0) = static_cast<unsigned char>(rojo[i][j]);
+            imagen(j, i, 0, 1) = static_cast<unsigned char>(verde[i][j]);
+            imagen(j, i, 0, 2) = static_cast<unsigned char>(azul[i][j]);
         }
     }
 
@@ -148,11 +180,11 @@ void GenerarImagenColor(const std::vector<std::vector<int>>& alfa,
 
 int main() {
     // Inicializa las matrices
+    std::vector<std::vector<int>> promedio(filas, std::vector<int>(columnas, 0));
     std::vector<std::vector<int>> alfa(filas, std::vector<int>(columnas, 0));
-    std::vector<std::vector<int>> azul(filas, std::vector<int>(columnas, 0));
     std::vector<std::vector<int>> rojo(filas, std::vector<int>(columnas, 0));
     std::vector<std::vector<int>> verde(filas, std::vector<int>(columnas, 0));
-    std::vector<std::vector<int>> promedio(filas, std::vector<int>(columnas, 0));
+    std::vector<std::vector<int>> azul(filas, std::vector<int>(columnas, 0));
  
     // Llamada de todas las funciones, despues se paralelizara
 
@@ -168,19 +200,19 @@ int main() {
     {
         #pragma omp section
         {
-            LimpiarValoresPerdidos(promedio, alfa, rojo, verde, azul, 1); // Limpia los valores de la matriz rojo
+            LimpiarValoresPerdidosRojo(promedio, alfa, rojo, verde, azul);
             VerificarMatriz(rojo);
         }
 
         #pragma omp section
         {
-            LimpiarValoresPerdidos(promedio, alfa, rojo, verde, azul, 2); // Limpia los valores de la matriz verde
+            LimpiarValoresPerdidosVerde(promedio, alfa, rojo, verde, azul);
             VerificarMatriz(verde);
         }
 
         #pragma omp section
         {
-            LimpiarValoresPerdidos(promedio, alfa, rojo, verde, azul, 3); // Limpia los valores de la matriz azul
+            LimpiarValoresPerdidosAzul(promedio, alfa, rojo, verde, azul);
             VerificarMatriz(azul);
         }
         #pragma omp section
