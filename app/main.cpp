@@ -83,19 +83,19 @@ void LimpiarValoresPerdidos(std::vector<std::vector<int>>& matrizPromedio,
                         if (azul[i][j] != -1 && verde[i][j] != -1) {
                             valorCalculadoRojo = (matrizPromedio[i][j] - (0.59 * verde[i][j]) + (0.11 * azul[i][j])) / 0.3;
                         }
-                        else valorCalculadoRojo = 0.0;
+                        else valorCalculadoRojo = matrizPromedio[i][j];
                         break;
                     case 2:// Para el caso de la matriz verde
                         if (rojo[i][j] != -1 && azul[i][j] != -1) {
                             valorCalculadoVerde = (matrizPromedio[i][j] - (0.3 * rojo[i][j]) + (0.11 * azul[i][j])) / 0.59;
                         }
-                        else valorCalculadoVerde = 0.0;
+                        else valorCalculadoVerde = matrizPromedio[i][j];
                         break;
                     case 3:// para el caso de la matriz azul
                         if (rojo[i][j] != -1 && verde[i][j] != -1) {
                             valorCalculadoAzul = (matrizPromedio[i][j] - (0.3 * rojo[i][j]) + (0.59 * verde[i][j])) / 0.11;
                         }
-                        else valorCalculadoAzul = 0.0;
+                        else valorCalculadoAzul = matrizPromedio[i][j];
                         break;
                     default:
                         std::cerr << "Caso no reconocido." << std::endl;
@@ -153,25 +153,42 @@ int main() {
     std::vector<std::vector<int>> rojo(filas, std::vector<int>(columnas, 0));
     std::vector<std::vector<int>> verde(filas, std::vector<int>(columnas, 0));
     std::vector<std::vector<int>> promedio(filas, std::vector<int>(columnas, 0));
+ 
+    // Llamada de todas las funciones, despues se paralelizara
 
-    // Se establece el número de hilos para OpenMP
-    //omp_set_num_threads(4);
-
-    // Llamada de funciones de forma paralela
     LeerArchivo("promedio.txt", promedio);
     LeerArchivo("alfa.txt", alfa);
     LeerArchivo("rojo.txt", rojo);
     LeerArchivo("verde.txt", verde);
     LeerArchivo("azul.txt", azul);
-    LimpiarValoresPerdidos(promedio, alfa, rojo, verde, azul, 1); // Limpia los valores de la matriz rojo
-    LimpiarValoresPerdidos(promedio, alfa, rojo, verde, azul, 2); // Limpia los valores de la matriz verde
-    LimpiarValoresPerdidos(promedio, alfa, rojo, verde, azul, 3); // Limpia los valores de la matriz azul
-    VerificarMatriz(rojo);
-    VerificarMatriz(verde);
-    VerificarMatriz(azul);
 
-    // Finalmente, con todas las matrices limpiadas y corregidas, se genera la imagen final en ARGB
-    GenerarImagenColor(alfa, azul, rojo, verde, "galaxia.png");
+    omp_set_num_threads(4);
+
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        {
+            LimpiarValoresPerdidos(promedio, alfa, rojo, verde, azul, 1); // Limpia los valores de la matriz rojo
+            VerificarMatriz(rojo);
+        }
+
+        #pragma omp section
+        {
+            LimpiarValoresPerdidos(promedio, alfa, rojo, verde, azul, 2); // Limpia los valores de la matriz verde
+            VerificarMatriz(verde);
+        }
+
+        #pragma omp section
+        {
+            LimpiarValoresPerdidos(promedio, alfa, rojo, verde, azul, 3); // Limpia los valores de la matriz azul
+            VerificarMatriz(azul);
+        }
+        #pragma omp section
+        {
+            GenerarImagenColor(alfa, azul, rojo, verde, "galaxia.png");
+        }
+    }
 
     return EXIT_SUCCESS;
+
 }
