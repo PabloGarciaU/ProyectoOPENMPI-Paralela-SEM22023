@@ -176,6 +176,8 @@ void GenerarImagenColor(const std::vector<std::vector<int>>& alfa,
 
     // Guarda la imagen
     imagen.save_bmp(nombreArchivo.c_str());
+    // Señala con un mensaje que la imagen se genero con exito
+    std::cout << "Imagen generada con exito, disfrute de su galaxia ;)." << std::endl;
 }
 
 int main() {
@@ -185,17 +187,39 @@ int main() {
     std::vector<std::vector<int>> rojo(filas, std::vector<int>(columnas, 0));
     std::vector<std::vector<int>> verde(filas, std::vector<int>(columnas, 0));
     std::vector<std::vector<int>> azul(filas, std::vector<int>(columnas, 0));
- 
-    // Llamada de todas las funciones, despues se paralelizara
 
-    LeerArchivo("promedio.txt", promedio);
-    LeerArchivo("alfa.txt", alfa);
-    LeerArchivo("rojo.txt", rojo);
-    LeerArchivo("verde.txt", verde);
-    LeerArchivo("azul.txt", azul);
-
+    // Establece el número de hilos para las siguientes secciones
     omp_set_num_threads(4);
 
+    // Paraleliza la lectura de archivos
+    #pragma omp parallel sections   
+    {
+        #pragma omp section
+        {
+            LeerArchivo("promedio.txt", promedio);
+            LeerArchivo("alfa.txt", alfa);
+        }
+
+        #pragma omp section
+        {
+            LeerArchivo("rojo.txt", rojo);
+        }
+
+        #pragma omp section
+        {
+            LeerArchivo("verde.txt", verde);
+        }
+
+        #pragma omp section
+        {
+            LeerArchivo("azul.txt", azul);
+        }
+    }
+
+    // Establece el número de hilos para las siguientes secciones
+    omp_set_num_threads(4);
+
+    // Paraleliza las secciones de procesamiento
     #pragma omp parallel sections
     {
         #pragma omp section
@@ -215,12 +239,11 @@ int main() {
             LimpiarValoresPerdidosAzul(promedio, alfa, rojo, verde, azul);
             VerificarMatriz(azul);
         }
+
         #pragma omp section
         {
             GenerarImagenColor(alfa, azul, rojo, verde, "galaxia.png");
         }
     }
-
-    return EXIT_SUCCESS;
-
+    return EXIT_SUCCESS;    
 }

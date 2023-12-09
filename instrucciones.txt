@@ -1,4 +1,11 @@
 //  Comandos para compilar
+
 cd app
 make
 time mpirun -hostfile maquinas.txt dist/programa alfa.txt rojo.txt verde.txt azul.txt
+
+//  Tiempo de compilacion en mi maquina
+
+real    0m38,852s
+user    0m34,250s
+sys     0m4,531s
